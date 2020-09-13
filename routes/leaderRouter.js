@@ -1,12 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const dishRouter = express.Router();
+const leaderRouter = express.Router();
 const Leaders = require("../models/leader")
 
-leaderRoter.use(bodyParser.json());
+leaderRouter.use(bodyParser.json());
 
-leaderRoter.route('/')
+leaderRouter.route('/')
     .get((req, res, next) => {
         Leaders.find({})
             .then((leaders) => {
@@ -19,7 +19,7 @@ leaderRoter.route('/')
     .post((req, res, next) => {
         Leaders.create(req.body)
             .then((leaders) => {
-                console.log('Dish Created ', leaders);
+                console.log('Leader Created ', leaders);
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
                 res.json(leaders);
@@ -40,9 +40,9 @@ leaderRoter.route('/')
             .catch((err) => next(err));
     });
 
-leaderRoter.route('/:leaderId')
+leaderRouter.route('/:leaderId')
     .get((req, res, next) => {
-        Leaders.findById(req.params.dishId)
+        Leaders.findById(req.params.leaderId)
             .then((leader) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -55,7 +55,7 @@ leaderRoter.route('/:leaderId')
         res.end('POST operation not supported on /leaders/' + req.params.leaderId);
     })
     .put((req, res, next) => {
-        Leaders.findByIdAndUpdate(req.params.dishId, {
+        Leaders.findByIdAndUpdate(req.params.leaderId, {
             $set: req.body
         }, { new: true })
             .then((leader) => {
@@ -66,7 +66,7 @@ leaderRoter.route('/:leaderId')
             .catch((err) => next(err));
     })
     .delete((req, res, next) => {
-        Leaders.findByIdAndRemove(req.params.dishId)
+        Leaders.findByIdAndRemove(req.params.leaderId)
             .then((resp) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
