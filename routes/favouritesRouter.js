@@ -38,7 +38,6 @@ favRouter.route('/')
                 console.log(favobject);
                 Favourites.find(favobject)
                     .then((favs) => {
-                        console.log(favs, 'finded')
                         if (favs.length <= 0) {
                             Favourites.create(favobject)
                                 .then((favs) => {
@@ -95,7 +94,7 @@ favRouter.route('/:favId')
         res.end('POST operation not supported on /favourites/');
     })
     .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-        Dishes.findById(req.body[0]._id)
+        Dishes.findById(req.body._id)
             .then((dish) => {
                 console.log(req.user.id, 'ok');
                 let favobject = {
@@ -105,7 +104,6 @@ favRouter.route('/:favId')
                 console.log(favobject);
                 Favourites.find(favobject)
                     .then((favs) => {
-                        console.log(favs, 'finded')
                         if (favs.length <= 0) {
                             Favourites.create(favobject)
                                 .then((favs) => {
@@ -121,28 +119,18 @@ favRouter.route('/:favId')
                             res.end('Already favourited');
                         }
                     })
-
             })
     })
     .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.varifyAdmin, (req, res, next) => {
-        Favourites.findById(req.params.dishId)
-            .then((dish) => {
-                if (dish != null) {
-                    for (var i = (dish.comments.length - 1); i >= 0; i--) {
-                        dish.comments.id(dish.comments[i]._id).remove();
-                    }
-                    dish.save()
-                        .then((dish) => {
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'application/json');
-                            res.json(dish);
-                        }, (err) => next(err));
-                }
-                else {
-                    err = new Error('Dish ' + req.params.dishId + ' not found');
-                    err.status = 404;
-                    return next(err);
-                }
+        let favobject = {
+            favDish: req.params.favId,
+            author: req.user.id
+        }
+        Favourites.findOneAndRemove(favobject)
+            .then((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(resp);
             }, (err) => next(err))
             .catch((err) => next(err));
     });
