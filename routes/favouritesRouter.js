@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+const Dishes = require('../models/dishes');
 const Favourites = require('../models/favorite');
 
 const favRouter = express.Router();
@@ -25,20 +26,36 @@ favRouter.route('/')
             }, (err) => next(err))
             .catch((err) => next(err));
     })
-    .post(cors.corsWithOptions, (req, res, next) => {
-        Favourites.find({favDish : req.body._id})
-            .then((favs) => {
-                if(favs.author.)
-                console.log(req.body)
-                console.log(favs)
-                Favourites.create(req.body)
-                    .then((dish) => {
-                        console.log('Dish Created ', dish);
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json(dish);
-                    }, (err) => next(err))
-                    .catch((err) => next(err));
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+        console.log('reached')
+        Dishes.findById(req.body[0]._id)
+            .then((dish) => {
+                // if(favs.author.)
+                console.log(req.user.id, 'ok');
+                let favobject = {
+                    favDish: dish._id,
+                    author: req.user.id
+                }
+                console.log(favobject);
+                Favourites.find(favobject)
+                    .then((favs) => {
+                        console.log(favs, 'finded')
+                        if (favs.length <= 0) {
+                            Favourites.create(favobject)
+                                .then((favs) => {
+                                    console.log('Dish Created ', favs);
+                                    res.statusCode = 200;
+                                    res.setHeader('Content-Type', 'application/json');
+                                    res.json(favs);
+                                }, (err) => next(err))
+                                .catch((err) => next(err));
+                        }
+                        else {
+                            res.statusCode = 403;
+                            res.end('Already favourited');
+                        }
+                    })
+
             })
     })
     .put(cors.corsWithOptions, authenticate.verifyUser, authenticate.varifyAdmin, (req, res, next) => {
